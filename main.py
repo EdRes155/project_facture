@@ -28,7 +28,7 @@ class App(tk.Tk):
 
         #Variablas ocultar frames
         self.frame_forget = 3
-        self.container_frames = null
+        self.container_frames = ttk.Frame
 
         #Creacion e incializacion del menubar
         self.menubar = tk.Menu(self)
@@ -63,34 +63,16 @@ class App(tk.Tk):
         self.menubar.add_cascade(label='Configuracion', menu=self.configuration)
 
     def __invoice(self):
+        self.container_frames.pack_forget()
         frame_invoice = Invoice(self)
-        if self.frame_forget == 1 and self.container_frames != frame_invoice:
-            self.container_frames.pack_forget()
-            frame_invoice.pack()
-            self.frame_forget = 2
-        elif self.frame_forget == 2:
-            self.container_frames.pack_forget()
-            frame_invoice.pack()
-            self.frame_forget = 3
-        else:
-            frame_invoice.pack()
-            self.container_frames = frame_invoice
-            self.frame_forget = 1
+        frame_invoice.pack()
+        self.container_frames = frame_invoice
 
     def __quotation(self):
+        self.container_frames.pack_forget()
         frame_quotation = Quotation(self)
-        if self.frame_forget == 1 and self.container_frames != frame_quotation:
-            self.container_frames.pack_forget()
-            frame_quotation.pack()
-            self.frame_forget = 2
-        elif self.frame_forget == 2:
-            self.container_frames.pack_forget()
-            frame_quotation.pack()
-            self.frame_forget = 3
-        else:
-            frame_quotation.pack()
-            self.container_frames = frame_quotation
-            self.frame_forget = 1
+        frame_quotation.pack()
+        self.container_frames = frame_quotation
 
 if __name__ == '__main__':
     app = App()
