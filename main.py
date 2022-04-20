@@ -11,6 +11,66 @@ class Invoice(ttk.Frame):
         self.invoice_label = tk.LabelFrame(self.frame, text='Facturar', font=('Helvetica', 20), background='white')
         self.invoice_label.place(x=5, y=5, width=1014, height=630)
 
+        self.client_number = tk.StringVar()
+        self.client_name = tk.StringVar()
+        self.client_rfc = tk.StringVar()
+        self.client_street = tk.StringVar()
+        self.client_town = tk.StringVar()
+        self.client_state = tk.StringVar()
+        self.client_zip_code = tk.StringVar()
+        self.client_telephone = tk.StringVar()
+        self.client_email = tk.StringVar()
+        self.product_code = tk.StringVar()
+
+        font_global = ('Roboto', 14)
+        font_global1 = ('Roboto', 12)
+
+        #Datos del cliente tras busqueda
+        ttk.Label(self.invoice_label, text='Cliente:', font=font_global, anchor='e', background='white').place(x=10, y=10, width=155)       
+        ttk.Label(self.invoice_label, text='Nombre Cliente:', font=font_global, anchor='e', background='white').place(x=10, y=50, width=155)       
+        ttk.Label(self.invoice_label, text='RFC:', font=font_global, anchor='e', background='white').place(x=480, y=50, width=155)       
+        ttk.Label(self.invoice_label, text='Calle/Numero:', font=font_global, anchor='e', background='white').place(x=10, y=90, width=155)       
+        ttk.Label(self.invoice_label, text='Colonia/Municipio:', font=font_global, anchor='e', background='white').place(x=10, y=130, width=155)       
+        ttk.Label(self.invoice_label, text='Estado/Pais:', font=font_global, anchor='e', background='white').place(x=10, y=170, width=155)       
+        ttk.Label(self.invoice_label, text='Codigo Postal:', font=font_global, anchor='e', background='white').place(x=10, y=210, width=155)       
+        ttk.Label(self.invoice_label, text='Telefono:', font=font_global, anchor='e', background='white').place(x=480, y=90, width=155)       
+        ttk.Label(self.invoice_label, text='Email:', font=font_global, anchor='e', background='white').place(x=480, y=130, width=155) 
+
+        ttk.Entry(self.invoice_label, textvariable=self.client_number, font=font_global1).place(x=170, y=10, width=100)      
+        ttk.Entry(self.invoice_label, textvariable=self.client_name, font=font_global1, state='disabled').place(x=170, y=50, width=300)      
+        ttk.Entry(self.invoice_label, textvariable=self.client_rfc, font=font_global1, state='disabled').place(x=640, y=50, width=150)      
+        ttk.Entry(self.invoice_label, textvariable=self.client_street, font=font_global1, state='disabled').place(x=170, y=90, width=180)      
+        ttk.Entry(self.invoice_label, textvariable=self.client_town, font=font_global1, state='disabled').place(x=170, y=130, width=230)      
+        ttk.Entry(self.invoice_label, textvariable=self.client_state, font=font_global1, state='disabled').place(x=170, y=170, width=200)      
+        ttk.Entry(self.invoice_label, textvariable=self.client_zip_code, font=font_global1, state='disabled').place(x=170, y=210, width=100)      
+        ttk.Entry(self.invoice_label, textvariable=self.client_telephone, font=font_global1, state='disabled').place(x=640, y=90, width=130)      
+        ttk.Entry(self.invoice_label, textvariable=self.client_email, font=font_global1, state='disabled').place(x=640, y=130, width=280)      
+
+        ttk.Button(self.invoice_label, text='Buscar').place(x=280, y=6, width=100)
+
+        #Agregar producto a factura
+        ttk.Label(self.invoice_label, text='Codigo:', font=font_global, anchor='e', background='white').place(x=10, y=260, width=150)
+        ttk.Entry(self.invoice_label, textvariable=self.product_code, font=font_global).place(x=170, y=260, width=400)
+        ttk.Button(self.invoice_label, text='Insertar').place(x=580, y=258, width=100)
+        ttk.Button(self.invoice_label, text='Buscar').place(x=690, y=258, width=100)
+
+        #Tabla para los productos
+        columns = ('#0', '#1', "#2", '#3', '#4')
+        self.product_table = ttk.Treeview(self.invoice_label, columns=columns, height=13)
+        self.product_table.heading('#0', text='Codigo')
+        self.product_table.heading('#1', text='Descripcion')
+        self.product_table.heading('#2', text='Precio')
+        self.product_table.heading('#3', text='Cantidad')
+        self.product_table.heading('#4', text='Importe')
+        self.product_table.heading(0, text='Importe')
+        self.product_table.column('#0', width=138)
+        self.product_table.column('#1', width=428)
+        self.product_table.column('#2', width=140)
+        self.product_table.column('#3', width=140)
+        self.product_table.column('#4', width=150)
+        self.product_table.place(x=10, y=300, width=984)
+
+
 #Clase añadir un cliente
 class Add_Client(ttk.Frame):
     def __init__(self, container):
