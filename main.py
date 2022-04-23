@@ -1,10 +1,7 @@
-import re
 import tkinter as tk
 from tkinter import ttk
 
 import sqlite3
-
-from h11 import Data
 
 class DataBase():
 
@@ -17,13 +14,15 @@ class DataBase():
             conn.commit()
         return result
 
+    #Añadr cliente a la BD
     def add_client(self, list=[]):
-        value = '' in list
+        value = '' in list #sin espacios vacios
         if value == False :
             question_select = 'SELECT client_number FROM client'
             result = self.__run_query(question_select)
             values = result.fetchall()
             client_number = True
+            #for aninado para agrupar valores de values y devuelve un valor bool para el if
             for value_in in values:
                 for value_on in value_in:
                     if value_on == list[0]:
@@ -31,30 +30,40 @@ class DataBase():
                         break
                     else:
                         client_number = False
+            #verifica y returna el valor para ingresar datos, devuelve un numero del 1 al 3
             if client_number == False:
                 question_insert = 'INSERT INTO client(client_number, name, rfc, street, town, state, zip_code, telephone, email) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)'
                 arguments = (list[0], list[1], list[2], list[3], list[4], list[5], list[6], list[7], list[8])
                 self.__run_query(question_insert, arguments)
-                return 1
+                return 1 
             else:
                 return 2      
         else:
             return 3
     
-    def checking(self, client_number):
-        question_select = 'SELECT client_number FROM client'
-        result = self.__run_query(question_select)
+    #Modificar cliente y eliminar cliente
+    def verify_client(self, client_number):
+        #verifica con el numero de cliente si y existe o no, devuelve un valor bol 
+        question = 'SELECT client_number FROM client'
+        result = self.__run_query(question)
         values = result.fetchall()
-        number = True
         for value_in in values:
-            for value_on in value_in:
-                if value_on == int(client_number):
-                    number = True
-                    break
-                else:
-                    number = False
-        return number
+            value = client_number in value_in
+        return value
 
+    def add_modified_client(self, client_number):
+        question = 'SELECT * FROM client'
+        result = self.__run_query(question)
+        values = result.fetchall()
+        list = []
+        for value_in in values:
+            value = client_number in value_in
+            if value == True:
+                for value_on in value_in:
+                    list.append(value_on)
+            else:
+                pass
+        return list
 
 class Invoice(ttk.Frame):
     def __init__(self, container):
@@ -180,10 +189,6 @@ class Add_Client(ttk.Frame):
         self.info = ttk.Label(self.client_label, text='', font=('Roboto', 12), background='white', anchor='c')
         self.info.place(x=205, y=380, width=300)
 
-        self.client_info = ttk.Label(self.client_label, text='', font=('Roboto', 12), anchor='s', background='white')
-        self.client_info.place(x=300, y=10, width=160)
-        self.client_number.trace('w', self.__on_validate(self.client_number.get()))
-
     def __save(self):
         list = [self.client_number.get(), self.client_name.get(), self.client_rfc.get(), self.client_street.get(), self.client_town.get(), self.client_state.get(), self.client_zip_code.get(), self.client_telephone.get(), self.client_email.get()]
         consult = DataBase()
@@ -192,7 +197,6 @@ class Add_Client(ttk.Frame):
             self.info.config(text='Cliente se registro correctamente.')
             self.info.config(foreground='green')
             self.__delete()
-            self.__search(self.client_number.get(), value=False)
         elif result == 2:
             self.info.config(text='Cliente ya existente.')
             self.info.config(foreground='red')
@@ -216,14 +220,6 @@ class Add_Client(ttk.Frame):
         self.client_telephone.set('')
         self.client_email.set('')
 
-    def __on_validate(self, client_number):
-        consult = DataBase()
-        result = consult.checking(self.client_number.get())
-        if result == True:
-            self.client_info.config(text=("CORRECTO"))
-        else:
-            self.client_info.config(text=("INCORRECTO"))
-
 #Clase modificar cliente
 class Modified_Client(ttk.Frame):
     def __init__(self, container):
@@ -238,19 +234,22 @@ class Modified_Client(ttk.Frame):
 
         self.font_global = ('Roboto', 14)
 
-        self.client_number = tk.StringVar()
+        self.client_number_verify = tk.IntVar()
 
         ttk.Label(self.check_label, text='Cliente:', font=self.font_global, background='white', anchor='e').place(x=10, y=20, width=80)
-        ttk.Entry(self.check_label, textvariable=self.client_number, font=self.font_global).place(x=95, y=20, width=170)
+        ttk.Entry(self.check_label, textvariable=self.client_number_verify, font=self.font_global).place(x=95, y=20, width=170)
 
-        ttk.Button(self.check_label, text='Entrar',command=lambda:self.__interface()).place(x=95, y=60, width=100)
+        ttk.Button(self.check_label, text='Entrar',command=lambda:self.__verify(self.client_number_verify.get())).place(x=95, y=60, width=100)
+
+        self.info_verify = ttk.Label(self.window, text='', font=('Roboto', 12), background='white', anchor='c')
+        self.info_verify.place(x=200, y=290, width=290)
 
     def __interface(self):
         self.check_label.pack_forget()
         self.client_label = tk.LabelFrame(self.window, text='Cliente', font=('Roboto', 20), background='white')
         self.client_label.place(x=5, y=5, width=710, height=470)
 
-        self.client_number = tk.StringVar()
+        self.client_number = tk.IntVar()
         self.client_name = tk.StringVar()
         self.client_rfc = tk.StringVar()
         self.client_street = tk.StringVar()
@@ -284,11 +283,66 @@ class Modified_Client(ttk.Frame):
         ttk.Entry(self.client_label, textvariable=self.client_telephone, font=font_global).place(x=180, y=290, width=130)
         ttk.Entry(self.client_label, textvariable=self.client_email, font=font_global).place(x=180, y=330, width=200)
 
-        ttk.Button(self.client_label, text='Aceptar').place(x=20, y=380, width=120)
+        ttk.Button(self.client_label, text='Aceptar', command=self.__save).place(x=20, y=380, width=120)
         ttk.Button(self.client_label, text='Cancelar', command=lambda:self.__cancel()).place(x=570, y=380, width=120)
 
+        self.info = ttk.Label(self.client_label, text='', font=('Roboto', 12), background='white', anchor='c')
+        self.info.place(x=205, y=380, width=300)
+
+    def __verify(self, client_number):
+        consult = DataBase()
+        result = consult.verify_client(client_number)
+        if result == True:
+            self.info_verify.config(text='Cliente encontrado')
+            self.client_number_verify.set('')
+            self.__interface()
+            list = consult.add_modified_client(client_number)
+            self.__add(list)
+        else:
+            self.info_verify.config(text='Cliente no existente')
+            self.client_number_verify.set('')
+
     def __save(self):
-        pass
+        list = [self.client_number.get(), self.client_name.get(), self.client_rfc.get(), self.client_street.get(), self.client_town.get(), self.client_state.get(), self.client_zip_code.get(), self.client_telephone.get(), self.client_email.get()]
+        consult = DataBase()
+        result = consult.add_client(list)
+        if result == 1:
+            self.info.config(text='Cliente se registro correctamente.')
+            self.info.config(foreground='green')
+            self.__delete()
+        elif result == 2:
+            self.info.config(text='Cliente ya existente.')
+            self.info.config(foreground='red')
+            self.__delete()
+        elif result == 3:
+            self.info.config(text='Rellene los campos vacios.')
+            self.info.config(foreground='green')
+        else:
+            self.info.config(text='¡ERROR!')
+            self.info.config(foreground='red')
+            self.__delete()
+    
+    def __delete(self):
+        self.client_number.set('')
+        self.client_name.set('')
+        self.client_rfc.set('')
+        self.client_street.set('')
+        self.client_town.set('')
+        self.client_state.set('')
+        self.client_zip_code.set('')
+        self.client_telephone.set('')
+        self.client_email.set('')
+
+    def __add(self, list=[]):
+        self.client_number.set(list[0])
+        self.client_name.set(list[1])
+        self.client_rfc.set(list[2])
+        self.client_street.set(list[3])
+        self.client_town.set(list[4])
+        self.client_state.set(list[5])
+        self.client_zip_code.set(list[6])
+        self.client_telephone.set(list[7])
+        self.client_email.set(list[8])
 
     def __cancel(self):
         self.client_label.place_forget()
