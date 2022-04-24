@@ -1,10 +1,7 @@
-from ast import arguments
 import tkinter as tk
-from tkinter import TclError, ttk
+from tkinter import ttk
 
 import sqlite3
-
-from sqlalchemy import false
 
 class DataBase():
 
@@ -59,8 +56,55 @@ class DataBase():
         arguments = (list[1], list[2], list[3], list[4], list[5], list[6], list[7], list[8], list[0])
         self.__run_query(question, arguments)
     
+    #Eliminar los datos del cliente
     def delete_client(self, client_number):
         question = 'DELETE FROM client WHERE client_number = ?'
+        arguments = (client_number, )
+        self.__run_query(question, arguments)
+
+    def add_product(self, list=[]):
+        value1 = '' in list #sin espacios vacios
+        if value1 == False:
+            question_select = 'SELECT code FROM product'
+            result = self.__run_query(question_select)
+            values = result.fetchall()
+            client_product = []
+            #for aninado para agrupar valores de values y devuelve un valor bool para el if
+            for value_in in values:
+                for value_on in value_in:
+                    client_product.append(value_on)
+            number = list[0] in client_product
+            #verifica y returna el valor para ingresar datos, devuelve un numero del 1 al 3
+            if number == False:
+                question_insert = 'INSERT INTO product(code, description, price, price_shop, price_iva, inventary) VALUES(?, ?, ?, ?, ?, ?)'
+                arguments = (list[0], list[1], list[2], list[3], list[4], list[5])
+                self.__run_query(question_insert, arguments)
+                return 1 
+            else:
+                return 2      
+        else:
+            return 3
+
+    def verify_product(self, code):
+        #verifica con el numero de cliente si y existe o no, devuelve un valor bol 
+        question = 'SELECT * FROM product WHERE code = ?'
+        result = self.__run_query(question, (code,))
+        values = result.fetchall()
+        list = []
+        for value_in in values:
+            for value_on in value_in:
+                list.append(value_on)
+        return list
+
+    #Actualiza los datos del cliente
+    def update_product(self, list=[]):
+        question = 'UPDATE product SET description = ?, price = ?, price_shop = ?, price_iva = ?, inventary = ? WHERE code = ?'
+        arguments = (list[1], list[2], list[3], list[4], list[5], list[0])
+        self.__run_query(question, arguments)
+    
+    #Eliminar los datos del cliente
+    def delete_product(self, client_number):
+        question = 'DELETE FROM product WHERE code = ?'
         arguments = (client_number, )
         self.__run_query(question, arguments)
 
@@ -74,7 +118,7 @@ class Invoice(ttk.Frame):
         self.invoice_label = tk.LabelFrame(self.frame, text='Facturar', font=('Helvetica', 20), background='white')
         self.invoice_label.place(x=5, y=5, width=1014, height=630)
 
-        self.client_number = tk.StringVar()
+        self.client_number = tk.IntVar()
         self.client_name = tk.StringVar()
         self.client_rfc = tk.StringVar()
         self.client_street = tk.StringVar()
@@ -132,7 +176,6 @@ class Invoice(ttk.Frame):
         self.product_table.column('#3', width=140)
         self.product_table.column('#4', width=150)
         self.product_table.place(x=10, y=300, width=984)
-
 
 #Clase añadir un cliente
 class Add_Client(ttk.Frame):
@@ -336,6 +379,7 @@ class Modified_Client(ttk.Frame):
         self.client_label.place_forget()
         self.check_label.place(x=200, y=130, width=290, height=150)
 
+#Clase eliminar cliente
 class Delete_Client(ttk.Frame):
     def __init__(self, container):
         super().__init__(container)
@@ -419,7 +463,7 @@ class Delete_Client(ttk.Frame):
 
     def __save(self):
         consult = DataBase()
-        consult.update_client(self.client_number.get())
+        consult.delete_client(self.client_number.get())
         self.__clean()
         self.__cancel()
         self.info_verify.config(text='Cliente se elimino correctamente.')
@@ -451,6 +495,7 @@ class Delete_Client(ttk.Frame):
         self.client_label.place_forget()
         self.check_label.place(x=200, y=130, width=290, height=150)
 
+#Clase agregar producto
 class Add_Product(ttk.Frame):
     def __init__(self, container):
         super().__init__(container)
@@ -485,15 +530,41 @@ class Add_Product(ttk.Frame):
         ttk.Entry(self.product_label, textvariable=self.product_price_shop_iva, font=font_global).place(x=220, y=170, width=100)
         ttk.Entry(self.product_label, textvariable=self.product_inventary, font=font_global).place(x=220, y=210, width=80)
 
-        ttk.Button(self.product_label, text='Aceptar').place(x=20, y=260, width=120)
-        ttk.Button(self.product_label, text='Cancelar').place(x=570, y=260, width=120)
+        ttk.Button(self.product_label, text='Aceptar', command=self.__save).place(x=20, y=260, width=120)
+        ttk.Button(self.product_label, text='Cancelar', command=lambda:self.window.destroy()).place(x=570, y=260, width=120)
+
+        self.info = ttk.Label(self.product_label, text='', font=('Roboto', 12), background='white', anchor='c')
+        self.info.place(x=205, y=260, width=300)
 
     def __save(self):
-        pass
+        list = [self.product_code.get(), self.product_description.get(), self.product_price.get(), self.product_price_shop.get(), self.product_price_shop_iva.get(), self.product_inventary.get()]
+        consult = DataBase()
+        result = consult.add_product(list)
+        if result == 1:
+            self.info.config(text='Producto registrado correctamente.')
+            self.info.config(foreground='green')
+            self.__delete()
+        elif result == 2:
+            self.info.config(text='Producto ya existe.')
+            self.info.config(foreground='red')
+            self.__delete()
+        elif result == 3:
+            self.info.config(text='Rellene los campos vacios.')
+            self.info.config(foreground='green')
+        else:
+            self.info.config(text='¡ERROR!')
+            self.info.config(foreground='red')
+            self.__delete()
+    
+    def __delete(self):
+        self.product_code.set('')
+        self.product_description.set('')
+        self.product_price.set('')
+        self.product_price_shop.set('')
+        self.product_price_shop_iva.set('')
+        self.product_inventary.set('')
 
-    def __cancel(self):
-        pass
-
+#Clase modificar producto
 class Modified_Product(ttk.Frame):
     def __init__(self, container):
         super().__init__(container)
@@ -507,12 +578,15 @@ class Modified_Product(ttk.Frame):
 
         self.font_global = ('Roboto', 14)
 
-        self.product_code = tk.StringVar()
+        self.product_code_verify = tk.StringVar()
 
         ttk.Label(self.check_label, text='Producto:', font=self.font_global, background='white', anchor='e').place(x=10, y=20, width=85)
-        ttk.Entry(self.check_label, textvariable=self.product_code, font=self.font_global).place(x=100, y=20, width=165)
+        ttk.Entry(self.check_label, textvariable=self.product_code_verify, font=self.font_global).place(x=100, y=20, width=165)
 
-        ttk.Button(self.check_label, text='Entrar',command=lambda:self.__interface()).place(x=95, y=60, width=100)
+        ttk.Button(self.check_label, text='Entrar',command=lambda:self.__verify()).place(x=95, y=60, width=100)
+
+        self.info_verify = ttk.Label(self.window, text='', font=('Roboto', 12), background='white', anchor='c')
+        self.info_verify.place(x=200, y=230, width=290)
 
     def __interface(self):
         self.check_label.place_forget()
@@ -542,17 +616,55 @@ class Modified_Product(ttk.Frame):
         ttk.Entry(self.product_label, textvariable=self.product_price_shop_iva, font=font_global).place(x=220, y=170, width=100)
         ttk.Entry(self.product_label, textvariable=self.product_inventary, font=font_global).place(x=220, y=210, width=80)
 
-        ttk.Button(self.product_label, text='Aceptar').place(x=20, y=260, width=120)
+        ttk.Button(self.product_label, text='Aceptar', command=self.__save).place(x=20, y=260, width=120)
         ttk.Button(self.product_label, text='Cancelar', command=lambda:self.__cancel()).place(x=570, y=260, width=120)
 
+    def __verify(self):
+        try:
+            consult = DataBase()
+            result = consult.verify_product(self.product_code_verify.get())
+            if result != []:
+                self.info_verify.config(text='Producto encontrado')
+                self.product_code_verify.set('')
+                self.__interface()
+                self.__add(result)
+            else:
+                self.info_verify.config(text='Producto no existente')
+                self.product_code_verify.set('')
+        except:
+            self.info_verify.config(text='Digite un codigo')
+            self.product_code_verify.set('')
+
     def __save(self):
-        pass
+        list = [self.product_code.get(), self.product_description.get(), self.product_price.get(), self.product_price_shop.get(), self.product_price_shop_iva.get(), self.product_inventary.get()]
+        consult = DataBase()
+        consult.update_product(list)
+        self.__delete()
+        self.__cancel()
+        self.info_verify.config(text='Producto actualizado correctamente.')
+        self.info_verify.config(foreground='green')
+    
+    def __delete(self):
+        self.product_code.set('')
+        self.product_description.set('')
+        self.product_price.set('')
+        self.product_price_shop.set('')
+        self.product_price_shop_iva.set('')
+        self.product_inventary.set('')
+
+    def __add(self, list=[]):
+        self.product_code.set(list[0])
+        self.product_description.set(list[1])
+        self.product_price.set(list[2])
+        self.product_price_shop.set(list[3])
+        self.product_price_shop_iva.set(list[4])
+        self.product_inventary.set(list[5])
 
     def __cancel(self):
         self.product_label.place_forget()
         self.check_label.place(x=200, y=70, width=290, height=150)
 
-
+#Clase eliminar producto
 class Delete_Product(ttk.Frame):
     def __init__(self, container):
         super().__init__(container)
@@ -566,12 +678,15 @@ class Delete_Product(ttk.Frame):
 
         self.font_global = ('Roboto', 14)
 
-        self.product_code = tk.StringVar()
+        self.product_code_verify = tk.StringVar()
 
         ttk.Label(self.check_label, text='Producto:', font=self.font_global, background='white', anchor='e').place(x=10, y=20, width=85)
-        ttk.Entry(self.check_label, textvariable=self.product_code, font=self.font_global).place(x=100, y=20, width=165)
+        ttk.Entry(self.check_label, textvariable=self.product_code_verify, font=self.font_global).place(x=100, y=20, width=165)
 
-        ttk.Button(self.check_label, text='Entrar',command=lambda:self.__interface()).place(x=95, y=60, width=100)
+        ttk.Button(self.check_label, text='Entrar',command=lambda:self.__verify()).place(x=95, y=60, width=100)
+
+        self.info_verify = ttk.Label(self.window, text='', font=('Roboto', 12), background='white', anchor='c')
+        self.info_verify.place(x=200, y=230, width=290)
 
     def __interface(self):
         self.check_label.place_forget()
@@ -594,18 +709,55 @@ class Delete_Product(ttk.Frame):
         ttk.Label(self.product_label, text='Precio Venta(con IVA):', font=font_global, anchor='e', background='white').place(x=10, y=170, width=200)
         ttk.Label(self.product_label, text='Cantidad:', font=font_global, anchor='e', background='white').place(x=10, y=210, width=200)
 
-        ttk.Entry(self.product_label, textvariable=self.product_code, font=font_global).place(x=220, y=10, width=120)
-        ttk.Entry(self.product_label, textvariable=self.product_description, font=font_global).place(x=220, y=50, width=350)
-        ttk.Entry(self.product_label, textvariable=self.product_price, font=font_global).place(x=220, y=90, width=100)
-        ttk.Entry(self.product_label, textvariable=self.product_price_shop, font=font_global).place(x=220, y=130, width=100)
-        ttk.Entry(self.product_label, textvariable=self.product_price_shop_iva, font=font_global).place(x=220, y=170, width=100)
-        ttk.Entry(self.product_label, textvariable=self.product_inventary, font=font_global).place(x=220, y=210, width=80)
+        ttk.Entry(self.product_label, textvariable=self.product_code, font=font_global, state='disabled').place(x=220, y=10, width=120)
+        ttk.Entry(self.product_label, textvariable=self.product_description, font=font_global, state='disabled').place(x=220, y=50, width=350)
+        ttk.Entry(self.product_label, textvariable=self.product_price, font=font_global, state='disabled').place(x=220, y=90, width=100)
+        ttk.Entry(self.product_label, textvariable=self.product_price_shop, font=font_global, state='disabled').place(x=220, y=130, width=100)
+        ttk.Entry(self.product_label, textvariable=self.product_price_shop_iva, font=font_global, state='disabled').place(x=220, y=170, width=100)
+        ttk.Entry(self.product_label, textvariable=self.product_inventary, font=font_global, state='disabled').place(x=220, y=210, width=80)
 
-        ttk.Button(self.product_label, text='Aceptar').place(x=20, y=260, width=120)
+        ttk.Button(self.product_label, text='Aceptar', command=self.__save).place(x=20, y=260, width=120)
         ttk.Button(self.product_label, text='Cancelar', command=lambda:self.__cancel()).place(x=570, y=260, width=120)
 
+    def __verify(self):
+        try:
+            consult = DataBase()
+            result = consult.verify_product(self.product_code_verify.get())
+            if result != []:
+                self.info_verify.config(text='Producto encontrado')
+                self.product_code_verify.set('')
+                self.__interface()
+                self.__add(result)
+            else:
+                self.info_verify.config(text='Producto no existente')
+                self.product_code_verify.set('')
+        except:
+            self.info_verify.config(text='Digite un codigo')
+            self.product_code_verify.set('')
+
     def __save(self):
-        pass
+        consult = DataBase()
+        consult.delete_product(self.product_code.get())
+        self.__delete()
+        self.__cancel()
+        self.info_verify.config(text='Producto eliminado correctamente.')
+        self.info_verify.config(foreground='green')
+    
+    def __delete(self):
+        self.product_code.set('')
+        self.product_description.set('')
+        self.product_price.set('')
+        self.product_price_shop.set('')
+        self.product_price_shop_iva.set('')
+        self.product_inventary.set('')
+
+    def __add(self, list=[]):
+        self.product_code.set(list[0])
+        self.product_description.set(list[1])
+        self.product_price.set(list[2])
+        self.product_price_shop.set(list[3])
+        self.product_price_shop_iva.set(list[4])
+        self.product_inventary.set(list[5])
 
     def __cancel(self):
         self.product_label.place_forget()
