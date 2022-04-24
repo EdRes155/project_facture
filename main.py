@@ -108,6 +108,29 @@ class DataBase():
         arguments = (client_number, )
         self.__run_query(question, arguments)
 
+    def add_product_table_sale(self, list=[]):
+        value = '' in list #sin espacios vacios
+        if value == False:
+            question_select = 'SELECT code FROM sale'
+            result = self.__run_query(question_select)
+            values = result.fetchall()
+            client_product = []
+            #for aninado para agrupar valores de values y devuelve un valor bool para el if
+            for value_in in values:
+                for value_on in value_in:
+                    client_product.append(value_on)
+            number = list[0] in client_product
+            #verifica y returna el valor para ingresar datos, devuelve un numero del 1 al 3
+            if number == False:
+                question_insert = 'INSERT INTO sale(code, description, price, quantity, amount) VALUES(?, ?, ?, ?, ?)'
+                arguments = (list[0], list[1], list[2], list[3], list[4])
+                self.__run_query(question_insert, arguments)
+                return 1 
+            else:
+                return 2      
+        else:
+            return 3
+
 class Invoice(ttk.Frame):
     def __init__(self, container):
         super().__init__(container)
@@ -141,7 +164,9 @@ class Invoice(ttk.Frame):
         ttk.Label(self.invoice_label, text='Estado/Pais:', font=font_global, anchor='e', background='white').place(x=10, y=170, width=155)       
         ttk.Label(self.invoice_label, text='Codigo Postal:', font=font_global, anchor='e', background='white').place(x=10, y=210, width=155)       
         ttk.Label(self.invoice_label, text='Telefono:', font=font_global, anchor='e', background='white').place(x=480, y=90, width=155)       
-        ttk.Label(self.invoice_label, text='Email:', font=font_global, anchor='e', background='white').place(x=480, y=130, width=155) 
+        ttk.Label(self.invoice_label, text='Email:', font=font_global, anchor='e', background='white').place(x=480, y=130, width=155)
+        self.info = ttk.Label(self.invoice_label, text='', font=font_global, anchor='s', background='white')
+        self.info.place(x=380, y=10, width=200)
 
         ttk.Entry(self.invoice_label, textvariable=self.client_number, font=font_global1).place(x=170, y=10, width=100)      
         ttk.Entry(self.invoice_label, textvariable=self.client_name, font=font_global1, state='disabled').place(x=170, y=50, width=300)      
@@ -153,29 +178,69 @@ class Invoice(ttk.Frame):
         ttk.Entry(self.invoice_label, textvariable=self.client_telephone, font=font_global1, state='disabled').place(x=640, y=90, width=130)      
         ttk.Entry(self.invoice_label, textvariable=self.client_email, font=font_global1, state='disabled').place(x=640, y=130, width=280)      
 
-        ttk.Button(self.invoice_label, text='Buscar').place(x=280, y=6, width=100)
+        ttk.Button(self.invoice_label, text='Buscar', command=self.__search_client).place(x=280, y=6, width=100)
 
         #Agregar producto a factura
         ttk.Label(self.invoice_label, text='Codigo:', font=font_global, anchor='e', background='white').place(x=10, y=260, width=150)
         ttk.Entry(self.invoice_label, textvariable=self.product_code, font=font_global).place(x=170, y=260, width=400)
-        ttk.Button(self.invoice_label, text='Insertar').place(x=580, y=258, width=100)
+        ttk.Button(self.invoice_label, text='Insertar', command=self.__search_product).place(x=580, y=258, width=100)
         ttk.Button(self.invoice_label, text='Buscar').place(x=690, y=258, width=100)
 
         #Tabla para los productos
-        columns = ('#0', '#1', "#2", '#3', '#4')
+        columns = ('#1', "#2", '#3', '#4')
         self.product_table = ttk.Treeview(self.invoice_label, columns=columns, height=13)
         self.product_table.heading('#0', text='Codigo')
         self.product_table.heading('#1', text='Descripcion')
         self.product_table.heading('#2', text='Precio')
         self.product_table.heading('#3', text='Cantidad')
         self.product_table.heading('#4', text='Importe')
-        self.product_table.heading(0, text='Importe')
-        self.product_table.column('#0', width=138)
-        self.product_table.column('#1', width=428)
+        self.product_table.column('#0', width=136)
+        self.product_table.column('#1', width=424)
         self.product_table.column('#2', width=140)
         self.product_table.column('#3', width=140)
-        self.product_table.column('#4', width=150)
+        self.product_table.column('#4', width=130)
         self.product_table.place(x=10, y=300, width=984)
+
+    def __search_client(self):
+        try:
+            consult = DataBase()
+            result = consult.verify_client(self.client_number.get())
+            if result != []:
+                self.info.config(text='Cliente encontrado', foreground='green')
+                self.client_number.set('')
+                self.__add(result)
+            else:
+                self.info.config(text='Cliente no existente', foreground='red')
+                self.client_number.set('')
+        except:
+            self.info.config(text='Digite un cliente')
+            self.client_number.set('')
+
+    def __add(self, list=[]):
+        self.client_number.set(list[0])
+        self.client_name.set(list[1])
+        self.client_rfc.set(list[2])
+        self.client_street.set(list[3])
+        self.client_town.set(list[4])
+        self.client_state.set(list[5])
+        self.client_zip_code.set(list[6])
+        self.client_telephone.set(list[7])
+        self.client_email.set(list[8])
+
+    def __search_product(self):
+        try:
+            consult = DataBase()
+            result = consult.verify_product(self.product_code.get())
+            if result != []:
+                consult.add_product_table_sale([result[0], result[1], result[4], 1, (result[4]*1)])
+                self.info.config(text='Producto encontrado', foreground='green')
+                self.product_code.set('')
+            else:
+                self.info.config(text='Producto no existente', foreground='red')
+                self.product_code.set('')
+        except:
+            self.info.config(text='Digite un cliente')
+            self.product_code.set('')
 
 #Clase añadir un cliente
 class Add_Client(ttk.Frame):
