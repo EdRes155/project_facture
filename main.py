@@ -125,12 +125,41 @@ class DataBase():
                 question_insert = 'INSERT INTO sale(code, description, price, quantity, amount) VALUES(?, ?, ?, ?, ?)'
                 arguments = (list[0], list[1], list[2], list[3], list[4])
                 self.__run_query(question_insert, arguments)
-                return 1 
+                return 1
             else:
-                return 2      
+                return 2
         else:
             return 3
 
+    def update_product_table_sale(self, quantity, amount, code):
+        question = 'UPDATE sale SET quantity = ?, amount = ? WHERE code = ?'
+        arguments = (quantity, amount, code)
+        self.__run_query(question, arguments)
+
+    def verify_product_sale(self, code):
+        #verifica con el numero de cliente si y existe o no, devuelve un valor bol 
+        question = 'SELECT * FROM sale WHERE code = ?'
+        result = self.__run_query(question, (code, ))
+        values = result.fetchall()
+        list = []
+        for value_in in values:
+            for value_on in value_in:
+                list.append(value_on)
+        return list
+
+    def verify_product_table_sale(self):
+        #verifica con el numero de cliente si y existe o no, devuelve un valor bol 
+        question = 'SELECT * FROM sale'
+        result = self.__run_query(question)
+        values = result.fetchall()
+        list_principal = []
+        for value_in in values:
+            list = []
+            for value_on in value_in:
+                list.append(value_on)
+            list_principal.append(list)
+        return list_principal
+        
 class Invoice(ttk.Frame):
     def __init__(self, container):
         super().__init__(container)
@@ -151,6 +180,7 @@ class Invoice(ttk.Frame):
         self.client_telephone = tk.StringVar()
         self.client_email = tk.StringVar()
         self.product_code = tk.StringVar()
+        self.quantity_sale = 0
 
         font_global = ('Roboto', 14)
         font_global1 = ('Roboto', 12)
@@ -231,16 +261,41 @@ class Invoice(ttk.Frame):
         try:
             consult = DataBase()
             result = consult.verify_product(self.product_code.get())
+            verify_quantity = consult.verify_product_sale(self.product_code.get())
+            print(result)
+            print(verify_quantity)
             if result != []:
-                consult.add_product_table_sale([result[0], result[1], result[4], 1, (result[4]*1)])
+                consult.add_product_table_sale([result[0], result[1], result[4], 1, result[4]])
                 self.info.config(text='Producto encontrado', foreground='green')
+                group = consult.verify_product_table_sale()
+                self.__insert_table(group)
+                self.product_code.set('')
+            elif result != [] and (result[0] == verify_quantity[0]):
+                new_quantity = verify_quantity[3]+1
+                new_amount = result[4]*new_quantity
+                consult.update_product_table_sale(new_quantity, new_amount, self.product_code.get())
+                self.info.config(text='Producto actualizado', foreground='green')
+                group = consult.verify_product_table_sale()
+                self.__insert_table(group)
                 self.product_code.set('')
             else:
                 self.info.config(text='Producto no existente', foreground='red')
                 self.product_code.set('')
-        except:
-            self.info.config(text='Digite un cliente')
+        except Exception as e:
+            self.info.config(text='ERROR')
+            print(e)
             self.product_code.set('')
+
+    def __insert_table(self, group=[]):
+        if group != []:
+            self.__clear()
+            for value in group:
+                self.product_table.insert('', 0, text=value[0], values=(value[1], value[2], value[3], value[4]))
+        else:
+            self.info.config(text='No hay productos a agregar.')
+
+    def __clear(self):
+        self.product_table.delete(*self.product_table.get_children())
 
 #Clase añadir un cliente
 class Add_Client(ttk.Frame):
