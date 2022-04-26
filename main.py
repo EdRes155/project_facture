@@ -1,7 +1,10 @@
+from os import lseek
+import re
 import tkinter as tk
 from tkinter import ttk
 
 import sqlite3
+from unittest import result
 
 class DataBase():
 
@@ -86,9 +89,10 @@ class DataBase():
             return 3
 
     def verify_product(self, code):
+        code_int = code.upper()
         #verifica con el numero de cliente si y existe o no, devuelve un valor bol 
         question = 'SELECT * FROM product WHERE code = ?'
-        result = self.__run_query(question, (code,))
+        result = self.__run_query(question, (code_int,))
         values = result.fetchall()
         list = []
         for value_in in values:
@@ -132,14 +136,16 @@ class DataBase():
             return 3
 
     def update_product_table_sale(self, quantity, amount, code):
+        code_int = code.upper()
         question = 'UPDATE sale SET quantity = ?, amount = ? WHERE code = ?'
-        arguments = (quantity, amount, code)
+        arguments = (quantity, amount, code_int)
         self.__run_query(question, arguments)
 
     def verify_product_sale(self, code):
+        code_int = code.upper()
         #verifica con el numero de cliente si y existe o no, devuelve un valor bol 
         question = 'SELECT * FROM sale WHERE code = ?'
-        result = self.__run_query(question, (code, ))
+        result = self.__run_query(question, (code_int, ))
         values = result.fetchall()
         list = []
         for value_in in values:
@@ -159,6 +165,23 @@ class DataBase():
                 list.append(value_on)
             list_principal.append(list)
         return list_principal
+
+    def search_table(self, description):
+        question  = 'SELECT * FROM product'
+        result = self.__run_query(question)
+        values = result.fetchall()
+        list_anid = []
+        for value_in in values:
+            list = []
+            value_lower = value_in[1].lower()
+            verify = description in value_lower
+            if verify == True:
+                for value_on in value_in:
+                    list.append(value_on)
+                list_anid.append(list)
+            else:
+                pass
+        return list_anid
         
 class Invoice(ttk.Frame):
     def __init__(self, container):
@@ -214,7 +237,7 @@ class Invoice(ttk.Frame):
         ttk.Label(self.invoice_label, text='Codigo:', font=font_global, anchor='e', background='white').place(x=10, y=260, width=150)
         ttk.Entry(self.invoice_label, textvariable=self.product_code, font=font_global).place(x=170, y=260, width=400)
         ttk.Button(self.invoice_label, text='Insertar', command=self.__search_product).place(x=580, y=258, width=100)
-        ttk.Button(self.invoice_label, text='Buscar').place(x=690, y=258, width=100)
+        ttk.Button(self.invoice_label, text='Buscar', command=self.__search_window).place(x=690, y=258, width=100)
 
         #Tabla para los productos
         columns = ('#1', "#2", '#3', '#4')
@@ -230,6 +253,28 @@ class Invoice(ttk.Frame):
         self.product_table.column('#3', width=140)
         self.product_table.column('#4', width=130)
         self.product_table.place(x=10, y=300, width=984)
+
+    def __search_window(self):
+        self.window = tk.Toplevel(self, width=720, height=370, background='white')
+        self.window.title('-- BUSCAR PRODUCTO --')
+        self.window.resizable(False, False)
+        self.window.attributes('-topmost', 'true')
+
+        self.product_search = tk.StringVar()
+
+        ttk.Label(self.window, text='Nombre:', font=('Roboto', 14), background='white', anchor='e').place(x=10, y=10, width=100)
+        ttk.Entry(self.window, textvariable=self.product_search, font=('Roboto', 14)).place(x=120, y=10, width=480)
+        ttk.Button(self.window, text='Buscar', command=self.__search).place(x=610, y=8, width=100)
+
+        columns = ('#1', "#2")
+        self.product_table_search = ttk.Treeview(self.window, columns=columns, height=14)
+        self.product_table_search.heading('#0', text='Codigo')
+        self.product_table_search.heading('#1', text='Descripcion')
+        self.product_table_search.heading('#2', text='Precio')
+        self.product_table_search.column('#0', width=145)
+        self.product_table_search.column('#1', width=400)
+        self.product_table_search.column('#2', width=150)
+        self.product_table_search.place(x=10, y=50, width=700)
 
     def __search_client(self):
         try:
@@ -262,15 +307,7 @@ class Invoice(ttk.Frame):
             consult = DataBase()
             result = consult.verify_product(self.product_code.get())
             verify_quantity = consult.verify_product_sale(self.product_code.get())
-            print(result)
-            print(verify_quantity)
-            if result != []:
-                consult.add_product_table_sale([result[0], result[1], result[4], 1, result[4]])
-                self.info.config(text='Producto encontrado', foreground='green')
-                group = consult.verify_product_table_sale()
-                self.__insert_table(group)
-                self.product_code.set('')
-            elif result != [] and (result[0] == verify_quantity[0]):
+            if result != [] and result[0] == verify_quantity[0]:
                 new_quantity = verify_quantity[3]+1
                 new_amount = result[4]*new_quantity
                 consult.update_product_table_sale(new_quantity, new_amount, self.product_code.get())
@@ -278,19 +315,46 @@ class Invoice(ttk.Frame):
                 group = consult.verify_product_table_sale()
                 self.__insert_table(group)
                 self.product_code.set('')
+            elif result != []:
+                consult.add_product_table_sale([result[0], result[1], result[4], 1, result[4]])
+                self.info.config(text='Producto encontrado', foreground='green')
+                group = consult.verify_product_table_sale()
+                self.__insert_table(group)
+                self.product_code.set('')
             else:
                 self.info.config(text='Producto no existente', foreground='red')
                 self.product_code.set('')
         except Exception as e:
-            self.info.config(text='ERROR')
-            print(e)
+            consult.add_product_table_sale([result[0], result[1], result[4], 1, result[4]])
+            self.info.config(text='Producto encontrado', foreground='green')
+            group = consult.verify_product_table_sale()
+            self.__insert_table(group)
             self.product_code.set('')
+
+    def __search(self):
+        consult = DataBase()
+        result = consult.search_table(self.product_search.get())
+        print(result)
+        if result != []:
+            self.__insert_table_search(result)
+            self.product_search.set('')
+        else:
+            print('No existe')
 
     def __insert_table(self, group=[]):
         if group != []:
             self.__clear()
             for value in group:
                 self.product_table.insert('', 0, text=value[0], values=(value[1], value[2], value[3], value[4]))
+        else:
+            self.info.config(text='No hay productos a agregar.')
+    
+    def __insert_table_search(self, group=[]):
+        self.product_table_search.delete(*self.product_table_search.get_children())
+        if group != []:
+            for value in group:
+                #for value in values:
+                self.product_table_search.insert('', 0, text=value[0], values=(value[1], value[2]))
         else:
             self.info.config(text='No hay productos a agregar.')
 
