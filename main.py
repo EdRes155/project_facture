@@ -1,10 +1,8 @@
-from os import lseek
-import re
 import tkinter as tk
 from tkinter import ttk
 
 import sqlite3
-from unittest import result
+import invoice
 
 class DataBase():
 
@@ -238,6 +236,7 @@ class Invoice(ttk.Frame):
         ttk.Entry(self.invoice_label, textvariable=self.product_code, font=font_global).place(x=170, y=260, width=400)
         ttk.Button(self.invoice_label, text='Insertar', command=self.__search_product).place(x=580, y=258, width=100)
         ttk.Button(self.invoice_label, text='Buscar', command=self.__search_window).place(x=690, y=258, width=100)
+        ttk.Button(self.invoice_label, text='Buscar', command=self.__search_window).place(x=800, y=258, width=100)
 
         #Tabla para los productos
         columns = ('#1', "#2", '#3', '#4')
@@ -360,6 +359,9 @@ class Invoice(ttk.Frame):
 
     def __clear(self):
         self.product_table.delete(*self.product_table.get_children())
+
+    def __make_invoice(self, information_bussines=[], information_address=[], products=[]):
+        pass
 
 #Clase añadir un cliente
 class Add_Client(ttk.Frame):
