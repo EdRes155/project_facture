@@ -2,6 +2,8 @@ import tkinter as tk
 from tkinter import ttk
 
 import sqlite3
+
+from h11 import Data
 import invoice
 
 class DataBase():
@@ -236,7 +238,7 @@ class Invoice(ttk.Frame):
         ttk.Entry(self.invoice_label, textvariable=self.product_code, font=font_global).place(x=170, y=260, width=400)
         ttk.Button(self.invoice_label, text='Insertar', command=self.__search_product).place(x=580, y=258, width=100)
         ttk.Button(self.invoice_label, text='Buscar', command=self.__search_window).place(x=690, y=258, width=100)
-        ttk.Button(self.invoice_label, text='Buscar', command=self.__search_window).place(x=800, y=258, width=100)
+        ttk.Button(self.invoice_label, text='Buscar', command=self.__make_invoice).place(x=800, y=258, width=100)
 
         #Tabla para los productos
         columns = ('#1', "#2", '#3', '#4')
@@ -360,8 +362,23 @@ class Invoice(ttk.Frame):
     def __clear(self):
         self.product_table.delete(*self.product_table.get_children())
 
-    def __make_invoice(self, information_bussines=[], information_address=[], products=[]):
-        pass
+    def __make_invoice(self):
+        consult = DataBase()
+        list_address = consult.verify_client(self.client_number.get())
+        list_product = consult.verify_product_table_sale()
+        Table_Bussines = invoice.Make_Invoice.InformationBussines('Empresa Ferretera Transcontinental', 'Carr. Fed. 70 El Refugio, Ciudad Fernandez, S.L.P C.P.79660', 'Email:ferretera_trascontinental@trascontinental.com    WhatsApp: 4871041366    Telf. 4878710567', '700052113')
+        Table_Client = invoice.Make_Invoice.InformationClient(list_address)
+        Table_Credit = invoice.Make_Invoice.InformationGeneral()
+        Table_Product_Information = invoice.Make_Invoice.InformationTableProduct()
+        Table_Product = invoice.Make_Invoice.InformationProduct(list_product)
+        subtotal = 0
+        anticipo = 0
+        for product in list_product:
+            subtotal += product[4]
+        Table_Total = invoice.Make_Invoice.Total(subtotal, anticipo)
+        Table_Observations = invoice.Make_Invoice.Observations()
+        Table_DatesAditional = invoice.Make_Invoice.DatesAditional()
+        invoice.Make_Invoice(Table_Bussines, Table_Client, Table_Credit, Table_Product_Information, Table_Product, Table_Total,Table_Observations, Table_DatesAditional)
 
 #Clase añadir un cliente
 class Add_Client(ttk.Frame):
