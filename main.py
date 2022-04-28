@@ -2,8 +2,6 @@ import tkinter as tk
 from tkinter import ttk
 
 import sqlite3
-
-from h11 import Data
 import invoice
 
 class DataBase():
@@ -971,6 +969,37 @@ class Configuration(ttk.Frame):
         super().__init__(container)
 
         self.window = tk.Toplevel(self, width=720, height=480, background='white')
+
+        self.name_bussines = tk.StringVar()
+        self.telf_bussines = tk.StringVar()
+        self.email_bussines = tk.StringVar()
+        self.whatsapp_bussines = tk.StringVar()
+        
+        self.street_bussines = tk.StringVar()
+        self.town_bussines = tk.StringVar()
+        self.state_bussines = tk.StringVar()
+
+        self.dates_general = tk.LabelFrame(self.window, text='Datos Generales', font=('Roboto', 16), background='white')
+        self.dates_general.place(x=10, y=10, width=700, height=200)
+        ttk.Label(self.dates_general, text='Nombre:', font=('Roboto', 14), anchor='e', background='white').place(x=10, y=10, width=100)
+        ttk.Entry(self.dates_general, textvariable=self.name_bussines, font=('Roboto', 14)).place(x=120, y=10, width=400)
+        ttk.Label(self.dates_general, text='Telefono:', font=('Roboto', 14), anchor='e', background='white').place(x=10, y=50, width=100)
+        ttk.Entry(self.dates_general, textvariable=self.telf_bussines, font=('Roboto', 14)).place(x=120, y=50, width=200)
+        ttk.Label(self.dates_general, text='Email:', font=('Roboto', 14), anchor='e', background='white').place(x=10, y=90, width=100)
+        ttk.Entry(self.dates_general, textvariable=self.email_bussines, font=('Roboto', 14)).place(x=120, y=90, width=350)
+        ttk.Label(self.dates_general, text='WhatsApp:', font=('Roboto', 14), anchor='e', background='white').place(x=10, y=130, width=100)
+        ttk.Entry(self.dates_general, textvariable=self.whatsapp_bussines, font=('Roboto', 14)).place(x=120, y=130, width=200)
+
+        self.dates_address = tk.LabelFrame(self.window, text='Direccion', font=('Roboto', 16), background='white')
+        self.dates_address.place(x=10, y=220, width=700, height=200)
+        ttk.Label(self.dates_address, text='Calle/Numero:', font=('Roboto', 14), anchor='e').place(x=10, y=10, width=170)
+        ttk.Entry(self.dates_address, textvariable=self.street_bussines, font=('Roboto', 14)).place(x=190, y=10, width=300)
+        ttk.Label(self.dates_address, text='Colonia/Municipio:', font=('Roboto', 14), anchor='e').place(x=10, y=50, width=170)
+        ttk.Entry(self.dates_address, textvariable=self.town_bussines, font=('Roboto', 14)).place(x=190, y=50, width=350)
+        ttk.Label(self.dates_address, text='Estado/Pais:', font=('Roboto', 14), anchor='e').place(x=10, y=90, width=170)
+        ttk.Entry(self.dates_address, textvariable=self.state_bussines, font=('Roboto', 14)).place(x=190, y=90, width=350)
+
+        ttk.Button(self.window, text='Aceptar').place(x=10, y=430, width=700)
 
 class App(tk.Tk):
     def __init__(self):
