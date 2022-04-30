@@ -1,5 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
+from tkinter import filedialog
+from pathlib import Path
 
 import sqlite3
 import invoice
@@ -975,34 +977,46 @@ class Configuration(ttk.Frame):
         self.email_bussines = tk.StringVar()
         self.whatsapp_bussines = tk.StringVar()
         self.folio_bussines = tk.StringVar()
+        self.logo_bussines = Path('logo.png')
         
         self.street_bussines = tk.StringVar()
         self.town_bussines = tk.StringVar()
         self.state_bussines = tk.StringVar()
 
-        self.dates_general = tk.LabelFrame(self.window, text='Datos Generales', font=('Roboto', 16), background='white')
-        self.dates_general.place(x=10, y=10, width=700, height=240)
-        ttk.Label(self.dates_general, text='Nombre:', font=('Roboto', 14), anchor='e', background='white').place(x=10, y=10, width=100)
-        ttk.Entry(self.dates_general, textvariable=self.name_bussines, font=('Roboto', 14)).place(x=120, y=10, width=400)
-        ttk.Label(self.dates_general, text='Telefono:', font=('Roboto', 14), anchor='e', background='white').place(x=10, y=50, width=100)
-        ttk.Entry(self.dates_general, textvariable=self.telf_bussines, font=('Roboto', 14)).place(x=120, y=50, width=200)
-        ttk.Label(self.dates_general, text='Email:', font=('Roboto', 14), anchor='e', background='white').place(x=10, y=90, width=100)
-        ttk.Entry(self.dates_general, textvariable=self.email_bussines, font=('Roboto', 14)).place(x=120, y=90, width=350)
-        ttk.Label(self.dates_general, text='WhatsApp:', font=('Roboto', 14), anchor='e', background='white').place(x=10, y=130, width=100)
-        ttk.Entry(self.dates_general, textvariable=self.whatsapp_bussines, font=('Roboto', 14)).place(x=120, y=130, width=200)
-        ttk.Label(self.dates_general, text='Folio:', font=('Roboto', 14), anchor='e', background='white').place(x=10, y=170, width=100)
-        ttk.Entry(self.dates_general, textvariable=self.folio_bussines, font=('Roboto', 14)).place(x=120, y=170, width=200)
+        ttk.Button(self.window, text='Datos Generales', command=self.__data_general).place(x=10, y=20, width=100)
+        ttk.Button(self.window, text='Direccion', command=self.__data_address).place(x=10, y=60, width=100)
+        ttk.Button(self.window, text='Ajustes').place(x=10, y=440, width=700)
+    
+    def __data_general(self):
+        self.data_general_window = tk.Toplevel(self.window, width=600, height=300, background='white')
 
-        self.dates_address = tk.LabelFrame(self.window, text='Direccion', font=('Roboto', 16), background='white')
-        self.dates_address.place(x=10, y=260, width=700, height=170)
+        self.data_general = tk.LabelFrame(self.data_general_window, text='Datos Generales', font=('Roboto', 16), background='white')
+        self.data_general.place(x=10, y=10, width=580, height=280)
+        ttk.Label(self.data_general, text='Nombre:', font=('Roboto', 14), anchor='e', background='white').place(x=10, y=10, width=100)
+        ttk.Entry(self.data_general, textvariable=self.name_bussines, font=('Roboto', 14)).place(x=120, y=10, width=400)
+        ttk.Label(self.data_general, text='Telefono:', font=('Roboto', 14), anchor='e', background='white').place(x=10, y=50, width=100)
+        ttk.Entry(self.data_general, textvariable=self.telf_bussines, font=('Roboto', 14)).place(x=120, y=50, width=200)
+        ttk.Label(self.data_general, text='Email:', font=('Roboto', 14), anchor='e', background='white').place(x=10, y=90, width=100)
+        ttk.Entry(self.data_general, textvariable=self.email_bussines, font=('Roboto', 14)).place(x=120, y=90, width=350)
+        ttk.Label(self.data_general, text='WhatsApp:', font=('Roboto', 14), anchor='e', background='white').place(x=10, y=130, width=100)
+        ttk.Entry(self.data_general, textvariable=self.whatsapp_bussines, font=('Roboto', 14)).place(x=120, y=130, width=200)
+        ttk.Label(self.data_general, text='Folio:', font=('Roboto', 14), anchor='e', background='white').place(x=10, y=170, width=100)
+        ttk.Entry(self.data_general, textvariable=self.folio_bussines, font=('Roboto', 14)).place(x=120, y=170, width=200)
+        ttk.Label(self.data_general, text='Logo:', font=('Roboto', 14), anchor='e', background='white').place(x=10, y=210, width=100)
+        ttk.Entry(self.data_general, textvariable=self.folio_bussines, font=('Roboto', 14)).place(x=120, y=210, width=200)
+        ttk.Button(self.data_general, text='Buscar').place(x=330, y=210, width=100)
+
+    def __data_address(self):
+        self.data_address_window = tk.Toplevel(self.window, width=720, height=200, background='white')
+
+        self.dates_address = tk.LabelFrame(self.data_address_window, text='Direccion', font=('Roboto', 16), background='white')
+        self.dates_address.place(x=10, y=10, width=700, height=170)
         ttk.Label(self.dates_address, text='Calle/Numero:', font=('Roboto', 14), anchor='e', background='white').place(x=10, y=10, width=170)
         ttk.Entry(self.dates_address, textvariable=self.street_bussines, font=('Roboto', 14)).place(x=190, y=10, width=300)
         ttk.Label(self.dates_address, text='Colonia/Municipio:', font=('Roboto', 14), anchor='e', background='white').place(x=10, y=50, width=170)
         ttk.Entry(self.dates_address, textvariable=self.town_bussines, font=('Roboto', 14)).place(x=190, y=50, width=350)
         ttk.Label(self.dates_address, text='Estado/Pais:', font=('Roboto', 14), anchor='e', background='white').place(x=10, y=90, width=170)
         ttk.Entry(self.dates_address, textvariable=self.state_bussines, font=('Roboto', 14)).place(x=190, y=90, width=350)
-
-        ttk.Button(self.window, text='Aceptar').place(x=10, y=440, width=700)
 
 class App(tk.Tk):
     def __init__(self):
