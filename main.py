@@ -203,7 +203,6 @@ class Invoice(ttk.Frame):
         self.client_telephone = tk.StringVar()
         self.client_email = tk.StringVar()
         self.product_code = tk.StringVar()
-        self.quantity_sale = 0
 
         font_global = ('Roboto', 14)
         font_global1 = ('Roboto', 12)
@@ -231,7 +230,7 @@ class Invoice(ttk.Frame):
         ttk.Entry(self.invoice_label, textvariable=self.client_telephone, font=font_global1, state='disabled').place(x=640, y=90, width=130)      
         ttk.Entry(self.invoice_label, textvariable=self.client_email, font=font_global1, state='disabled').place(x=640, y=130, width=280)      
 
-        ttk.Button(self.invoice_label, text='Buscar', command=self.__search_client).place(x=280, y=6, width=100)
+        tk.Button(self.invoice_label, text='Buscar', command=self.__search_client).place(x=280, y=6, width=40, height=40)
 
         #Agregar producto a factura
         ttk.Label(self.invoice_label, text='Codigo:', font=font_global, anchor='e', background='white').place(x=10, y=260, width=150)
@@ -983,9 +982,13 @@ class Configuration(ttk.Frame):
         self.town_bussines = tk.StringVar()
         self.state_bussines = tk.StringVar()
 
-        ttk.Button(self.window, text='Datos Generales', command=self.__data_general).place(x=10, y=20, width=100)
-        ttk.Button(self.window, text='Direccion', command=self.__data_address).place(x=10, y=60, width=100)
-        ttk.Button(self.window, text='Ajustes').place(x=10, y=440, width=700)
+        self.info_general = tk.LabelFrame(self.window, text='Informacion De La Empresa', font=('Roboto', 16), background='white')
+        self.info_general.place(x=10, y=10, width=700, height=100)
+        self.button_data_general = ttk.Button(self.info_general, text='Datos Generales', command=self.__data_general)
+        self.button_data_general.place(x=10, y=20, width=200)
+        self.button_data_address = ttk.Button(self.info_general, text='Direccion', command=self.__data_address)
+        self.button_data_address.place(x=220, y=20, width=150)
+        #ttk.Button(self.window, text='Ajustes').place(x=10, y=440, width=700)
     
     def __data_general(self):
         self.data_general_window = tk.Toplevel(self.window, width=600, height=300, background='white')
@@ -1004,19 +1007,24 @@ class Configuration(ttk.Frame):
         ttk.Entry(self.data_general, textvariable=self.folio_bussines, font=('Roboto', 14)).place(x=120, y=170, width=200)
         ttk.Label(self.data_general, text='Logo:', font=('Roboto', 14), anchor='e', background='white').place(x=10, y=210, width=100)
         ttk.Entry(self.data_general, textvariable=self.folio_bussines, font=('Roboto', 14)).place(x=120, y=210, width=200)
-        ttk.Button(self.data_general, text='Buscar').place(x=330, y=210, width=100)
+        ttk.Button(self.data_general, text='Buscar').place(x=330, y=208, width=80)
+        ttk.Button(self.data_general, text='Agregar Datos').place(x=418, y=208, width=140)
+        self.button_data_general.config(state='disabled')
+
+        self.data_general_window.protocol('WM_DELETE_WINDOW', self.button_data_general.config(state='normal'))
 
     def __data_address(self):
-        self.data_address_window = tk.Toplevel(self.window, width=720, height=200, background='white')
+        self.data_address_window = tk.Toplevel(self.window, width=720, height=180, background='white')
 
-        self.dates_address = tk.LabelFrame(self.data_address_window, text='Direccion', font=('Roboto', 16), background='white')
-        self.dates_address.place(x=10, y=10, width=700, height=170)
-        ttk.Label(self.dates_address, text='Calle/Numero:', font=('Roboto', 14), anchor='e', background='white').place(x=10, y=10, width=170)
-        ttk.Entry(self.dates_address, textvariable=self.street_bussines, font=('Roboto', 14)).place(x=190, y=10, width=300)
-        ttk.Label(self.dates_address, text='Colonia/Municipio:', font=('Roboto', 14), anchor='e', background='white').place(x=10, y=50, width=170)
-        ttk.Entry(self.dates_address, textvariable=self.town_bussines, font=('Roboto', 14)).place(x=190, y=50, width=350)
-        ttk.Label(self.dates_address, text='Estado/Pais:', font=('Roboto', 14), anchor='e', background='white').place(x=10, y=90, width=170)
-        ttk.Entry(self.dates_address, textvariable=self.state_bussines, font=('Roboto', 14)).place(x=190, y=90, width=350)
+        self.data_address = tk.LabelFrame(self.data_address_window, text='Direccion', font=('Roboto', 16), background='white')
+        self.data_address.place(x=10, y=10, width=700, height=160)
+        ttk.Label(self.data_address, text='Calle/Numero:', font=('Roboto', 14), anchor='e', background='white').place(x=10, y=10, width=170)
+        ttk.Entry(self.data_address, textvariable=self.street_bussines, font=('Roboto', 14)).place(x=190, y=10, width=300)
+        ttk.Label(self.data_address, text='Colonia/Municipio:', font=('Roboto', 14), anchor='e', background='white').place(x=10, y=50, width=170)
+        ttk.Entry(self.data_address, textvariable=self.town_bussines, font=('Roboto', 14)).place(x=190, y=50, width=350)
+        ttk.Label(self.data_address, text='Estado/Pais:', font=('Roboto', 14), anchor='e', background='white').place(x=10, y=90, width=170)
+        ttk.Entry(self.data_address, textvariable=self.state_bussines, font=('Roboto', 14)).place(x=190, y=90, width=350)
+        ttk.Button(self.data_address, text='Agregar Datos').place(x=550, y=88, width=140)
 
 class App(tk.Tk):
     def __init__(self):
