@@ -1,20 +1,17 @@
 from pathlib import Path
 from borb.pdf.document.document import Document
 from borb.pdf.page.page import Page
-from borb.pdf.canvas.layout.page_layout.multi_column_layout import SingleColumnLayout, MultiColumnLayout
+from borb.pdf.canvas.layout.page_layout.multi_column_layout import MultiColumnLayout
 from borb.pdf.canvas.layout.page_layout.page_layout import PageLayout
 from borb.pdf.canvas.layout.text.paragraph import Paragraph
 from borb.pdf.canvas.layout.layout_element import Alignment
 from borb.pdf.canvas.layout.table.fixed_column_width_table import FixedColumnWidthTable
-from borb.pdf.canvas.layout.table.flexible_column_width_table import (FlexibleColumnWidthTable,)
 from borb.pdf.canvas.layout.table.table import TableCell
 from borb.pdf.canvas.layout.image.image import Image
-from borb.pdf.canvas.geometry.line_segment import LineSegment
 from borb.pdf.canvas.color.color import HexColor, X11Color
 from borb.pdf.pdf import PDF
 from decimal import Decimal
 from datetime import datetime
-import random
 
 class Make_Invoice():
 
@@ -76,13 +73,10 @@ class Make_Invoice():
 
     def InformationGeneral():
         now = datetime.now()
-        Table_Credit: FixedColumnWidthTable = FixedColumnWidthTable(number_of_columns=3, number_of_rows=2, column_widths=(Decimal(1), Decimal(2), Decimal(1)))
-        Table_Credit.add(TableCell(Paragraph('Inicio de credito', font='Helvetica', font_size=Decimal(8), padding_bottom=Decimal(2.5), horizontal_alignment=Alignment.CENTERED), background_color=HexColor('9D9D9D')))
-        Table_Credit.add(TableCell(Paragraph('Condicion de pago', font='Helvetica', font_size=Decimal(8), padding_bottom=Decimal(2.5), horizontal_alignment=Alignment.CENTERED), background_color=HexColor('9D9D9D')))
-        Table_Credit.add(TableCell(Paragraph('Vencimiento', font='Helvetica', font_size=Decimal(8), padding_bottom=Decimal(2.5), horizontal_alignment=Alignment.CENTERED), background_color=HexColor('9D9D9D')))
-        Table_Credit.add(Paragraph('%d/%d/%d' % (now.day, now.month, now.year), font='Helvetica', font_size=Decimal(8), padding_bottom=Decimal(2.5), horizontal_alignment=Alignment.CENTERED))
-        Table_Credit.add(Paragraph('10 Dias', font='Helvetica', font_size=Decimal(8), padding_bottom=Decimal(2.5), horizontal_alignment=Alignment.CENTERED))
-        Table_Credit.add(Paragraph('%d/%d/%d' % (now.day+10, now.month, now.year), font='Helvetica', font_size=Decimal(8), padding_bottom=Decimal(2.5), horizontal_alignment=Alignment.CENTERED))
+        Table_Credit: FixedColumnWidthTable = FixedColumnWidthTable(number_of_columns=3, number_of_rows=1, column_widths=(Decimal(1), Decimal(2), Decimal(1)))
+        Table_Credit.add(TableCell(Paragraph('Inicio de credito %d/%d/%d' % (now.day, now.month, now.year), font='Helvetica', font_size=Decimal(8), padding_bottom=Decimal(2.5), horizontal_alignment=Alignment.CENTERED), background_color=HexColor('9D9D9D')))
+        Table_Credit.add(TableCell(Paragraph('Condicion de pago 10 Dias', font='Helvetica', font_size=Decimal(8), padding_bottom=Decimal(2.5), horizontal_alignment=Alignment.CENTERED), background_color=HexColor('9D9D9D')))
+        Table_Credit.add(TableCell(Paragraph('Vencimiento %d/%d/%d' % (now.day+10, now.month, now.year), font='Helvetica', font_size=Decimal(8), padding_bottom=Decimal(2.5), horizontal_alignment=Alignment.CENTERED), background_color=HexColor('9D9D9D')))
         Table_Credit.set_padding_on_all_cells(Decimal(1), Decimal(1), Decimal(1), Decimal(1))
         Table_Credit.no_borders()
         return Table_Credit
@@ -154,7 +148,3 @@ class Make_Invoice():
         Table_DatesAditional.set_padding_on_all_cells(Decimal(1), Decimal(1), Decimal(1), Decimal(1))
         Table_DatesAditional.no_borders()
         return Table_DatesAditional
-
-#if __name__ == '__main__':
-#    Make_Invoice()
-#    Make_Invoice().InformationBussines('Ferremas', 'Av. Abasolo 678 El Refugio', 'Tel. 4871146873  Whats. 4871146873', '7252113')

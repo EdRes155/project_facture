@@ -143,7 +143,6 @@ class DataBase():
 
     def verify_product_sale(self, code):
         code_int = code.upper()
-        #verifica con el numero de cliente si y existe o no, devuelve un valor bol 
         question = 'SELECT * FROM sale WHERE code = ?'
         result = self.__run_query(question, (code_int, ))
         values = result.fetchall()
@@ -154,7 +153,6 @@ class DataBase():
         return list
 
     def verify_product_table_sale(self):
-        #verifica con el numero de cliente si y existe o no, devuelve un valor bol 
         question = 'SELECT * FROM sale'
         result = self.__run_query(question)
         values = result.fetchall()
@@ -182,6 +180,9 @@ class DataBase():
             else:
                 pass
         return list_anid
+
+    def add_data_general(self, data=[]):
+
         
 class Invoice(ttk.Frame):
     def __init__(self, container):
@@ -1006,13 +1007,10 @@ class Configuration(ttk.Frame):
         ttk.Label(self.data_general, text='Folio:', font=('Roboto', 14), anchor='e', background='white').place(x=10, y=170, width=100)
         ttk.Entry(self.data_general, textvariable=self.folio_bussines, font=('Roboto', 14)).place(x=120, y=170, width=200)
         ttk.Label(self.data_general, text='Logo:', font=('Roboto', 14), anchor='e', background='white').place(x=10, y=210, width=100)
-        ttk.Entry(self.data_general, textvariable=self.folio_bussines, font=('Roboto', 14)).place(x=120, y=210, width=200)
+        ttk.Entry(self.data_general, textvariable=self.logo_bussines, font=('Roboto', 14)).place(x=120, y=210, width=200)
         ttk.Button(self.data_general, text='Buscar').place(x=330, y=208, width=80)
         ttk.Button(self.data_general, text='Agregar Datos').place(x=418, y=208, width=140)
-        self.button_data_general.config(state='disabled')
-
-        self.data_general_window.protocol('WM_DELETE_WINDOW', self.button_data_general.config(state='normal'))
-
+    
     def __data_address(self):
         self.data_address_window = tk.Toplevel(self.window, width=720, height=180, background='white')
 
@@ -1025,6 +1023,9 @@ class Configuration(ttk.Frame):
         ttk.Label(self.data_address, text='Estado/Pais:', font=('Roboto', 14), anchor='e', background='white').place(x=10, y=90, width=170)
         ttk.Entry(self.data_address, textvariable=self.state_bussines, font=('Roboto', 14)).place(x=190, y=90, width=350)
         ttk.Button(self.data_address, text='Agregar Datos').place(x=550, y=88, width=140)
+
+    def __add_data_general(self):
+        pass
 
 class App(tk.Tk):
     def __init__(self):
